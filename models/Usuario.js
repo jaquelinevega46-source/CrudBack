@@ -1,8 +1,15 @@
+
+require('dotenv').config();
+
 const { Sequelize, DataTypes } = require('sequelize');
 
-const sequelize = new Sequelize('Usuarios', 'root','JaquelineV_04', {
-    host: 'localhost',
-    dialect: 'mysql',
+const sequelize = new Sequelize(
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD, 
+    {
+    host: process.env.DB_HOST,
+    dialect: process.env.DB_DIALECT,
     logging: false
 });
 
@@ -18,14 +25,17 @@ const Usuario = sequelize.define('Usuario',{
     },
     telefono: {
         type: DataTypes.STRING,
+        unique: true,
         allowNull: false
     },
     correo: {
         type: DataTypes.STRING,
+        unique: true,
         allowNull: false
     },
     contraseña: {
         type: DataTypes.STRING,
+        unique: true,
         allowNull: false
     }
     }, {
