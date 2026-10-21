@@ -120,10 +120,33 @@ const eliminarUsuario = async (req, res) => {
     }
 };
 
+//front
+
+const cambiarEStatus = async (req, res) => {
+    try{
+        const { id, estatus } = req.body;
+        if(!id || !estatus){
+            return res.status(400).json({ mensaje: 'SE REQUIERE ID'});
+        }
+        const usuario = await Usuario.findByPk(id);
+        if(!usuario){
+            return res.status(404).json({mensaje: 'USUARIO NO ENCONTRADO'});
+        }
+
+        usuario.estatus = estatus;
+        await usuario.save();
+
+        res.json({mensaje: `ESTATUS:${estatus.toUpperCAse()}`, usuario});
+    } catch(error) {
+        res.status(500).json({mensaje:'ERROR DE CAMBIO DE ESTATUS'});
+    }
+};
+
 module.exports = {
     obtenerUsuarios,
     obUsuarioId,
     crearUsuario,
     actualizarUsuario,
-    eliminarUsuario
+    eliminarUsuario,
+    cambiarEStatus
 };

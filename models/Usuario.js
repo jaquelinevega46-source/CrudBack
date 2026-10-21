@@ -37,7 +37,13 @@ const Usuario = sequelize.define('Usuario',{
         type: DataTypes.STRING,
         unique: true,
         allowNull: false
-    }
+    },
+
+    //front
+    estatus: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
     }, {
         tableName: 'USUARIO',
         timestamps: false
