@@ -35,13 +35,13 @@ const Usuario = sequelize.define('Usuario',{
     },
     contraseña: {
         type: DataTypes.STRING,
-        unique: true,
         allowNull: false
     },
 
     //front
     estatus: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('ACTIVO','INACTIVO'),
+        defaultValue: 'ACTIVO',
         allowNull: false
     },
     }, {

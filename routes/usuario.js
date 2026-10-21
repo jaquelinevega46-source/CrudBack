@@ -8,15 +8,15 @@ const {
     crearUsuario,
     actualizarUsuario,
     eliminarUsuario,
-    cambiarEStatus
+    cambiarEstatus
 } = require('../controller/usuario');
 
 router.get('/',obtenerUsuarios);
-router.get('/:id',obUsuarioId);
+router.get('/ob',obUsuarioId);
 router.post('/',crearUsuario);
 router.put('/',actualizarUsuario);
 router.delete('/us',eliminarUsuario);
-router.put('/es',cambiarEStatus);
+router.put('/es',cambiarEstatus);
 
 
 module.exports = router;

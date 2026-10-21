@@ -20,6 +20,11 @@ const login = async (req, res) => {
             return res.status(404).json({ mensaje: 'USUARIO INEXISTENTE' });
         }
 
+        //validacion de estatus de usuario
+        if(usuario.estatus == 'INACTIVO') {
+            return res.status(403).json({mensaje: 'SIN ACCESO: USUARIO INACTIVO'});
+        }
+
         // 3. Comparar contraseña encriptada
         const uValido = await bcrypt.compare(passwordIngresada, usuario.contraseña);
 

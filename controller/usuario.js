@@ -16,7 +16,7 @@ const obtenerUsuarios = async (req, res) => {
 
 const obUsuarioId = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { id } = req.body;
         const usuario = await Usuario.findByPk(id);
         
         if (!usuario) {
@@ -122,10 +122,10 @@ const eliminarUsuario = async (req, res) => {
 
 //front
 
-const cambiarEStatus = async (req, res) => {
+const cambiarEstatus = async (req, res) => {
     try{
         const { id, estatus } = req.body;
-        if(!id || !estatus){
+        if(!id || !['ACTIVO', 'INACTIVO'].includes(estatus)){
             return res.status(400).json({ mensaje: 'SE REQUIERE ID'});
         }
         const usuario = await Usuario.findByPk(id);
@@ -136,7 +136,7 @@ const cambiarEStatus = async (req, res) => {
         usuario.estatus = estatus;
         await usuario.save();
 
-        res.json({mensaje: `ESTATUS:${estatus.toUpperCAse()}`, usuario});
+        res.json({mensaje: `ESTATUS:${estatus.toUpperCase()}`, usuario});
     } catch(error) {
         res.status(500).json({mensaje:'ERROR DE CAMBIO DE ESTATUS'});
     }
@@ -148,5 +148,5 @@ module.exports = {
     crearUsuario,
     actualizarUsuario,
     eliminarUsuario,
-    cambiarEStatus
+    cambiarEstatus
 };
