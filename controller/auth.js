@@ -5,9 +5,9 @@ const bcrypt = require('bcryptjs');
 
 const login = async (req, res) => {
     try {
-        const { correo, contraseña } = req.body;
-        const passwordIngresada = contraseña;
-
+        const correo = req.body.correo;
+        const passwordIngresada = req.body.password || req.body.contraseña || req.body.contrasena;
+        
         // 1. Validar datos obligatorios
         if (!correo || !passwordIngresada) {
             return res.status(400).json({ mensaje: 'DATOS OBLIGATORIOS' });

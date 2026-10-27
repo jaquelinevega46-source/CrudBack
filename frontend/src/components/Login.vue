@@ -1,41 +1,47 @@
 <template>
     <div class="card-container">
         <h2>INICIO DE SESION</h2>
-        <form @submit.prevent=""iniciarSesion>
+        <form @submit.prevent="iniciarSesion">
             <div class="field">
-                <label>COOREO:</label>
+                <label>CORREO:</label>
                 <input type="email" v-model="correo" placeholder="correo@ejemplo.com" required />
             </div>
 
             <div class="field">
                 <label>CONTRASEÑA:</label>
-                <input type="passwprd" v-model="contraseña" placeholder="******" require />
+                <input type="password" v-model="contraseña" placeholder="******" required />
             </div>
 
             <button type="submit" class="btn-primary">INGRESAR</button>
         </form>
+        
         <div v-if="mensaje" :class="['alert', esError ? 'alert-error' : 'alert-success']">
             {{ mensaje }}
         </div>
 
         <div v-if="usuario" class="user-card">
-            <h3>DATOS DEL USUARIO</h3>
-            <p><strong>ID:</strong>{{ usuario.id }}</p>
-            <p><strong>NOMBRE:</strong>{{ usuario.nombre }}</p>
-            <p><strong>CORREO:</strong>{{ usuario.correo }}</p>
-            <p><strong>ESTATUS:</strong>
-            <span :class="usuario.estatus">{{ usuario.estatus.toUpperCase() }}</span>
-            </p>
+    <h3>DATOS DEL USUARIO</h3>
+    <p><strong>ID: </strong>{{ usuario.id }}</p>
+    <p><strong>NOMBRE: </strong>{{ usuario.nombre }}</p>
+    <p><strong>CORREO: </strong>{{ usuario.correo }}</p>
+    <p><strong>ESTATUS: </strong>
+    <span :class="usuario.estatus ? usuario.estatus.toLowerCase() : ''">
+        {{ usuario.estatus ? usuario.estatus.toUpperCase() : 'N/A' }}
+    </span>
+    </p>
 
-            <button @click="toggleEstatus" :class="usuario.estatus == 'activo' ? 'btn-danger' :'btn-succes'"
-            > {{ usuario.estatus == 'activo' ? 'DESACTIVAR CUENTA' : 'ACTIVAR CUENTA' }} 
-            </button>
-        </div>
+    <button 
+    @click="toggleEstatus" 
+    :class="(usuario.estatus && usuario.estatus.toUpperCase() === 'ACTIVO') ? 'btn-danger' : 'btn-success'"
+    > 
+    {{ (usuario.estatus && usuario.estatus.toUpperCase() === 'ACTIVO') ? 'DESACTIVAR CUENTA' : 'ACTIVAR CUENTA' }} 
+    </button>
     </div>
+</div>
 </template>
 
 <script setup>
-import {ref} from 'vue';
+import { ref } from 'vue';
 
 const correo = ref('');
 const contraseña = ref('');
@@ -52,33 +58,39 @@ const iniciarSesion = async () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 correo: correo.value,
-                contraseña: contraseña.value
+                password: contraseña.value
             })
         });
 
-        if(!res.ok) {
+        // Convertimos la respuesta JSON PRIMERO para poder usar sus datos
+        const data = await res.json();
+
+        if (!res.ok) {
             esError.value = true;
-            mensaje.value = data.mensaje;
+            mensaje.value = data.mensaje || 'Error al iniciar sesión';
             usuario.value = null;
             return;
         }
 
         esError.value = false;
-        mensaje.value = data.mensaje;
+        mensaje.value = data.mensaje || '¡Inicio de sesión exitoso!';
         usuario.value = data.usuario;
-    } catch (error){
+    } catch (error) {
         esError.value = true;
         mensaje.value = 'ERROR DE CONEXION CON EL SERVIDOR';
     }
 };
 
 const toggleEstatus = async () => {
-    const nuevoEstatus = usuario.value.estatus === 'activo' ? 'inactivo' : 'activo';
+    if (!usuario.value || !usuario.value.estatus) return;
 
-    try{
-        const res = await fetch(`${API_URL}/usuarios/estatus`,{
+    const estatusActual = usuario.value.estatus.toUpperCase();
+    const nuevoEstatus = estatusActual === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
+
+    try {
+        const res = await fetch(`${API_URL}/usuarios/es`, {
             method: 'PUT',
-            headers: { 'Content-TYpe' : 'application/json' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 id: usuario.value.id,
                 estatus: nuevoEstatus
@@ -87,22 +99,20 @@ const toggleEstatus = async () => {
 
         const data = await res.json();
 
-        if(res.ok){
+        if (res.ok) {
             usuario.value.estatus = nuevoEstatus;
             esError.value = false;
-            mensaje.value = data.mensaje;
+            mensaje.value = data.mensaje || 'Estatus actualizado correctamente';
         } else {
             esError.value = true;
-            mensaje.value = data.mensaje;
+            mensaje.value = data.mensaje || 'Error al cambiar estatus';
         }
-    } catch (error){
+    } catch (error) {
         esError.value = true;
         mensaje.value = 'ERROR DE ACTUALIZACION';
     }
 };
-
 </script>
-
 
 <style scoped>
 .card-container {
