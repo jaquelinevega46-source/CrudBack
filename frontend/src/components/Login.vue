@@ -102,3 +102,76 @@ const toggleEstatus = async () => {
 };
 
 </script>
+
+
+<style scoped>
+.card-container {
+  max-width: 400px;
+  margin: 40px auto;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-family: sans-serif;
+  background-color: #ffffff;
+  color: #333;
+}
+.field {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+.field label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+.field input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.btn-primary {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.alert {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  font-weight: bold;
+}
+.alert-error { background-color: #f8d7da; color: #721c24; }
+.alert-success { background-color: #d4edda; color: #155724; }
+
+.user-card {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 2px solid #eee;
+}
+.activo { color: #28a745; font-weight: bold; }
+.inactivo { color: #dc3545; font-weight: bold; }
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+.btn-success {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+</style>
