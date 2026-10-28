@@ -125,13 +125,13 @@ const eliminarUsuario = async (req, res) => {
 const cambiarEstatus = async (req, res) => {
     try{
         const { id, estatus } = req.body;
-        if(!id || !['ACTIVO', 'INACTIVO'].includes(estatus)){
-            return res.status(400).json({ mensaje: 'SE REQUIERE ID'});
-        }
+            if(!id || !['ACTIVO', 'INACTIVO'].includes(estatus)){
+                return res.status(400).json({ mensaje: 'SE REQUIERE ID'});
+            }
         const usuario = await Usuario.findByPk(id);
-        if(!usuario){
-            return res.status(404).json({mensaje: 'USUARIO NO ENCONTRADO'});
-        }
+            if(!usuario){
+                return res.status(404).json({mensaje: 'USUARIO NO ENCONTRADO'});
+            }
 
         usuario.estatus = estatus;
         await usuario.save();
