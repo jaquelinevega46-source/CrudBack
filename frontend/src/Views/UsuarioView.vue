@@ -2,6 +2,11 @@
   <div class="admin-container">
     <header class="header">
       <h2>GESTIÓN DE USUARIOS</h2>
+      <div class="user-info">
+       <span>Bienvenido: <strong>{{ usuarioActual?.nombre }}</strong> 
+        ({{ usuarioActual?.rol?.toUpperCase() }})
+      </span> 
+      </div>
       <button @click="cerrarSesion" class="btn-logout">CERRAR SESIÓN</button>
     </header>
 
@@ -18,7 +23,11 @@
             <th>TELÉFONO</th>
             <th>CORREO</th>
             <th>ESTATUS</th>
-            <th>ACCIONES</th>
+             <th>ROL</th>
+
+
+            <!-- control de administrador -->
+            <th v-if="esAdmin">ACCIONES</th>
           </tr>
         </thead>
         <tbody>
@@ -27,36 +36,96 @@
             <td>{{ user.nombre }}</td>
             <td>{{ user.telefono }}</td>
             <td>{{ user.correo }}</td>
+            <td>{{ user.rol ? user.rol.toUpperCase(): 'USUARIO' }}</td>
             <td>
               <span :class="['badge', user.estatus ? user.estatus.toLowerCase() : '']">
                 {{ user.estatus ? user.estatus.toUpperCase() : 'N/A' }}
               </span>
             </td>
-            <td>
+            <!-- CAMBIO DE ESTATUS -->
+            <td v-if="esAdmin">
               <button 
                 @click="toggleEstatus(user)" 
                 :class="['btn-action', user.estatus && user.estatus.toUpperCase() === 'ACTIVO' ? 'btn-danger' : 'btn-success']"
               >
                 {{ user.estatus && user.estatus.toUpperCase() === 'ACTIVO' ? 'DESACTIVAR' : 'ACTIVAR' }}
               </button>
+
+              <!-- ELIMINAR USUARIO -->
+               <button @click="confirmarEliminacion(user)" class="btn-action btn-delete">
+                ELIMINAR
+               </button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+
+    <!-- CREAR USUARIO -->
+    <div v-if="mostrarModal" class=""modal-overlay>
+      <div class="modal-content">
+        <h3>REGISTRAR NUEVO USUARIO</h3>
+        <form @submit.prevent="guardarUsuario">
+          <div class="form-group">
+            <label>NOMBRE:</label>
+            <input type="text" v-model="nuevoUsuario.nombre" required placeholder="Ej. Carlos Ruiz" />
+          </div>
+          <div class="form-group">
+            <label>TELEFONO:</label>
+            <input type="text" v-model="nuevoUsuario.telefono" required placeholder="Ej. 5512345678" />
+          </div>
+          <div class="form group">
+            <label>CORREO:</label>
+            <input type="email" v-model="nuevoUsuario.correo" required placeholder="correo@ejemplo.com" />
+          </div>
+          <div class="form-group">
+            <label>CONTRASEÑA:</label>
+            <input type="password" v-model="nuevoUsuario.contraseña" required placeholder="******" />
+          </div>
+          <div class="form-group">
+            <label>ROL:</label>
+            <select v-model="nuevoUsuario.rol">
+              <option value="usuario">USUARIO</option>
+              <option value="admin">ADMINISTRADOR</option>
+            </select>
+          </div>
+
+          <div class="modal-buttons">
+            <button type="submit" class="btn-success">GUARDAR</button>
+            <button type="button" @click="cerrarModal" class="btn-logout">CANCELAR</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const listaUsuarios = ref([]);
 const mensaje = ref('');
 const esError = ref(false);
+const usuarioActual = ref(null);
+
+// CONTROL
+const mostrarModal = ref(false);
+const nuevoUsuario = ref({
+  nombre: '',
+  telefono: '',
+  correo: '',
+  contraseña: '',
+  rol: 'usuario'
+});
 
 const API_URL = 'http://localhost:3000/api';
+
+// verificacion del rol de la cuenta
+const esAdmin = computed(() => {
+  return usuarioActual.value && usuarioActual.value.rol === 'admin';
+});
 
 onMounted(() => {
   const sesion = localStorage.getItem('usuario');
@@ -64,6 +133,7 @@ onMounted(() => {
     router.push('/login');
     return;
   }
+  usuarioActual.value = JSON.parse(sesion);
   obtenerUsuarios();
 });
 
@@ -83,7 +153,11 @@ const obtenerUsuarios = async () => {
   }
 };
 
-const toggleEstatus = async (user) => {
+const toggleEstatus = async (user) => { //solicitud de acciones denegada
+  if (!esAdmin.value){
+    alert('NO TIENES PERMISOS PARA REALIZAR ESTA ACCION');
+    return;
+  }
   const estatusActual = user.estatus ? user.estatus.toUpperCase() : 'INACTIVO';
   const nuevoEstatus = estatusActual === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
 
@@ -112,6 +186,72 @@ const toggleEstatus = async (user) => {
     mensaje.value = 'ERROR AL COMUNICAR CON EL SERVIDOR';
   }
 };
+
+
+//GUARDAR USUARIO
+const guardarUsuario = async () => {
+  try{
+    const res = await fetch(`${API_URL}/usuarios`,{
+      method: 'POST',
+      headers:{ 'Content-Type':'application/json'},
+      body: JSON.stringify(nuevoUsuario.value)
+    });
+    const data = await res.json();
+
+    if(res.ok){
+      esError.value = false;
+      mensaje.value = `USUARIO ${nuevoUsuario.value.nombre} CREADO`;
+      cerrarModal();
+      obtenerUsuarios();
+    }else {
+      esError.value = true;
+      mensaje.value = data.mensaje || 'ERROR AL CREAR USUARIO';
+    }
+  }catch (error){
+    esError.value = true;
+    mensaje.value = 'ERROR DE CONEXION';
+  }
+};
+
+//ELIMINAR USUARIO
+const confirmarEliminacion = async (user) => {
+  if (!confirm(`ESTAS SEGURO DE QUE QUIERES ELIMINAR ESTE USUARIO ${user.nombre}`)){
+    return;
+  }
+  try {
+    const res = await fetch(`${API_URL}/usuarios`,{
+      method: 'DELETE',
+      headers: { 'Content-TYpe': 'application/json'},
+      body: JSON.stringify({id: user.id})
+    });
+
+    const data = await res.json();
+
+    if (res.ok){
+      esError.value = false;
+      mensaje.value = 'USUARIO ELIMINADO';
+      obtenerUsuarios();
+    } else {
+      esError.value = true;
+      mensaje.value = data.mensaje || 'ERROR AL ELIMINAR';
+    }
+  } catch (error){
+    esError.value = true;
+    mensaje.value = 'ERROR DE CONEXION';
+  }
+};
+
+const cerrarModal = ()=> {
+  mostrarModal.value = false;
+  nuevoUsuario.value = {
+    nombre:'',
+    telefono:'',
+    correo:'',
+    contraseña:'',
+    rol: 'usuario'
+  };
+};
+
 
 const cerrarSesion = () => {
   localStorage.removeItem('usuario');
