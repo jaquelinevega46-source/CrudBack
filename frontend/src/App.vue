@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <main>
     <Login />
   </main>
@@ -6,4 +6,14 @@
 
 <script setup>
 import Login from './components/Login.vue';
+</script> -->
+
+<template>
+  <main>
+    <router-view />
+  </main>
+</template>
+
+<script setup>
+
 </script>
