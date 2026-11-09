@@ -15,7 +15,7 @@ router.get('/',obtenerUsuarios);
 router.get('/ob',obUsuarioId);
 router.post('/',crearUsuario);
 router.put('/',actualizarUsuario);
-router.delete('/us',eliminarUsuario);
+router.delete('/',eliminarUsuario);
 router.put('/es',cambiarEstatus);
 
 
