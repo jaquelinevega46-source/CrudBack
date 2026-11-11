@@ -9,9 +9,11 @@ import Login from './components/Login.vue';
 </script> -->
 
 <template>
-  <main>
+  <v-app>
+  <v-main>
     <router-view />
-  </main>
+  </v-main>
+</v-app>
 </template>
 
 <script setup>
